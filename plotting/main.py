@@ -4,8 +4,6 @@ import sys
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-# Press the green button in the gutter to run the script.
-
 
 def read_csv(filename):
     with open(filename, newline='') as csvfile:
@@ -21,40 +19,39 @@ def plot_all_in_directory(directory):
         if path.__contains__("total-results") or path.__contains__("graphs"):
             continue
         rows = read_csv(path)
+        count_and_message_size = rows.pop(0)
         header = rows.pop(0)
         sorted_rows = sorted(rows)
         columns = list(map(list, zip(*sorted_rows)))
         plt.figure()
-        plt.plot(convert_to_int(columns[0]), convert_to_int(columns[1]), linewidth=1, marker='o',
-                 markerfacecolor='blue', markersize=3, linestyle='dashed')
+        plt.plot(list(map(divide_by_1000, convert_to_int(columns[0]))), convert_to_int(columns[1]), linewidth=0.5, marker='o',
+                 markerfacecolor='blue', markersize=1, linestyle='dashed')
+        plt.ylim(ymin=0)
         plt.xlabel(header[0])
         plt.ylabel(header[1])
-        plt.title(file[:-4])
+        plt.suptitle(file[:-4])
+        plt.title(count_and_message_size[0] + count_and_message_size[1] +
+                  " " + count_and_message_size[2] + count_and_message_size[3])
         plt.gcf().autofmt_xdate()
 
 
+def divide_by_1000(number):
+    return number / 1000
+
+
 def save_plots_to_pdf(filename):
-    # PdfPages is a wrapper around pdf
-    # file so there is no clash and
-    # create files with no error.
     p = PdfPages(filename)
 
-    # get_fignums Return list of existing
-    # figure numbers
     fig_nums = plt.get_fignums()
     figs = [plt.figure(n) for n in fig_nums]
-
-    # iterating over the numbers in list
     for fig in figs:
-        # and saving the files
         fig.savefig(p, format='pdf')
-
-        # close the object
     p.close()
 
 
 def convert_to_int(array):
     return list(map(int, array))
+
 
 if __name__ == '__main__':
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
